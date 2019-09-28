@@ -1056,6 +1056,21 @@ public abstract class AbstractAssertJTest {
     }
 
     @Test
+    void jsonPathWithIgnoredPathsDeep() {
+        assertThatJson(json)
+            .withConfiguration(c -> c.whenIgnoringPaths("$..price"))
+            .inPath("$.store.book[0]")
+            .isEqualTo(
+                "            {\n" +
+                    "                \"category\": \"reference\",\n" +
+                    "                \"author\": \"Nigel Rees\",\n" +
+                    "                \"title\": \"Sayings of the Century\",\n" +
+                    "                \"price\": 999\n" +
+                    "            }"
+            );
+    }
+
+    @Test
     void jsonPathWithNode() {
         assertThatJson(json)
             .inPath("$.store.book[0]")

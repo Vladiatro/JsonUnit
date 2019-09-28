@@ -90,7 +90,7 @@ public class Diff {
         this.configuration = configuration;
         this.diffLogger = diffLogger;
         this.valuesLogger = valuesLogger;
-        this.pathsToBeIgnored = PathMatcher.create(configuration.getPathsToBeIgnored());
+        this.pathsToBeIgnored = PathMatcher.create(configuration.getPathsToBeIgnored(), actualRoot);
         this.differenceString = differenceString;
     }
 

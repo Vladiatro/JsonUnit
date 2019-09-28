@@ -16,7 +16,6 @@
 package net.javacrumbs.jsonunit.core.internal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -31,26 +30,28 @@ abstract class PathMatcher {
 
     abstract boolean matches(String pathToMatch);
 
-    static PathMatcher create(Set<String> paths) {
+    static PathMatcher create(Set<String> paths, Node json) {
         if (paths == null || paths.isEmpty()) {
             return EMPTY;
         }
         List<PathMatcher> matchers = new ArrayList<>(paths.size());
         for (String path : paths) {
-            matchers.add(PathMatcher.create(path));
+            matchers.add(PathMatcher.create(path, json));
         }
         return new AggregatePathMatcher(matchers);
     }
 
-    static PathMatcher create(String path) {
-        if (path.contains("[*]")) {
+    static PathMatcher create(String path, Node json) {
+        if (path.startsWith("$")) {
+          return JsonPathMatcherResolver.pathMatcherForJsonPath(path, json);
+        } else if (path.contains("[*]")) {
             return new ArrayWildcardMatcher(path);
         } else {
             return new SimplePathMatcher(path);
         }
     }
 
-    private static class SimplePathMatcher extends PathMatcher {
+    static class SimplePathMatcher extends PathMatcher {
         private final String path;
 
         SimplePathMatcher(String path) {
@@ -97,11 +98,11 @@ abstract class PathMatcher {
         }
     }
 
-    private static class AggregatePathMatcher extends PathMatcher {
+    static class AggregatePathMatcher extends PathMatcher {
 
-        private final Collection<PathMatcher> pathMatchers;
+        private final Iterable<PathMatcher> pathMatchers;
 
-        private AggregatePathMatcher(Collection<PathMatcher> pathMatchers) {
+        AggregatePathMatcher(Iterable<PathMatcher> pathMatchers) {
             this.pathMatchers = pathMatchers;
         }
 
